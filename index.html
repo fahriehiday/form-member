@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Form Pendaftaran Member</title>
+  <title>Premium Digital Product Template Registration Form</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
@@ -86,6 +86,26 @@
       transition: width 0.3s ease;
       width: 50%;
     }
+    .copy-btn {
+      background-color: #10b981;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .harga-paket {
+      font-weight: bold;
+      margin-top: 8px;
+      display: block;
+    }
+    .countdown {
+      text-align: center;
+      font-size: 14px;
+      margin-top: 10px;
+      color: #1e40af;
+    }
     @media (max-width: 480px) {
       body {
         padding: 10px;
@@ -95,18 +115,16 @@
         font-size: 14px;
       }
     }
-  
     s {
       color: #9ca3af;
       font-weight: normal;
       margin-right: 6px;
       text-decoration: line-through;
     }
-    </style>
-
+  </style>
 </head>
 <body>
-  <h2>🎨 Form Pendaftaran Komunitas Kreator</h2>
+  <h2>🎨 Template Produk Digital Premium</h2>
   <div id="progress-container">
     <div id="progress-bar"></div>
   </div>
@@ -121,16 +139,22 @@
 
     <label>Pilih Paket:</label>
     <select name="paket" id="paket">
-      <option value="paket1">🎉 <s>Rp34.999</s> Rp25.000 / 1 bulan</option>
-      <option value="paket2">🎉 <s>Rp54.999</s> Rp45.000 / 2 bulan</option>
-      <option value="paket3">🎉 <s>Rp74.999</s> Rp60.000 / 3 bulan</option>
+      <option value="25000">🎉 Harga Semula <s>3̶4̶.̶9̶9̶9̶ </s> Menjadi Rp25.000</option>
+      <option value="45000">🎉 Harga Semula <s>5̶4̶.̶9̶9̶9̶ </s> Menjadi Rp45.000</option>
+      <option value="60000">🎉 Harga Semula <s>7̶4̶.̶9̶9̶9̶ </s> Menjadi Rp60.000</option>
     </select>
+    <span class="harga-paket" id="hargaPaket"></span>
 
     <label>Metode Pembayaran:</label>
     <select name="pembayaran">
+      <option value="">-- Pilih Metode --</option>
       <option value="DANA">DANA</option>
       <option value="MANDIRI">Mandiri</option>
     </select>
+
+    <div id="nomorPembayaran" class="highlight"></div>
+    <button type="button" class="copy-btn" id="salinBtn">📋 Salin Nomor</button>
+    <div class="countdown" id="countdown"></div>
 
     <label>Upload Bukti Pembayaran (foto)</label>
     <input type="file" name="bukti" accept="image/*" required />
@@ -152,117 +176,66 @@
   <div id="toast"></div>
 
   <script>
-    const validReferralCodes = {
-      "FAHRI25": true,
-      "ALFA07": true,
-      "NISA10": true
-    };
+    const metodePembayaran = document.querySelector('select[name="pembayaran"]');
+    const nomorPembayaran = document.getElementById("nomorPembayaran");
+    const paketSelect = document.getElementById("paket");
+    const hargaPaket = document.getElementById("hargaPaket");
+    const countdownEl = document.getElementById("countdown");
+    const salinBtn = document.getElementById("salinBtn");
 
-    const form = document.getElementById("regForm");
-    const result = document.getElementById("result");
-    const diskonInfo = document.getElementById("diskonInfo");
-    const thankyouMessage = document.getElementById("thankyouMessage");
-    const submitBtn = document.getElementById("submitBtn");
+    let countdown;
+    let batasWaktu;
 
-    function showToast(msg) {
-      const toast = document.getElementById("toast");
-      toast.textContent = msg;
-      toast.style.display = "block";
-      setTimeout(() => { toast.style.display = "none"; }, 4000);
+    function tampilkanNomorDanQR(metode) {
+      if (metode === "DANA") {
+        nomorPembayaran.innerHTML = `💰 Transfer ke <strong id="targetNomor">0898-3637-8972</strong> a.n. Fahri Hidayat`;
+      } else if (metode === "MANDIRI") {
+        nomorPembayaran.innerHTML = `🏦 Transfer ke <strong id="targetNomor">1340030538796</strong> a.n. Fahri Hidayat`;
+      } else {
+        nomorPembayaran.innerHTML = "";
+      }
     }
 
-    function bukaBantuan() {
-      const pesan = encodeURIComponent("Halo Admin! Saya butuh bantuan terkait pendaftaran. Bisa dibantu?");
-      window.open(`https://wa.me/6285928811220?text=${pesan}`, '_blank');
-    }
-
-    // Simpan input ke localStorage agar tidak hilang saat refresh
-    document.querySelectorAll("#regForm input, #regForm select").forEach(input => {
-      input.addEventListener("input", () => {
-        localStorage.setItem(input.name, input.value);
-      });
-    });
-    window.addEventListener("load", () => {
-      document.querySelectorAll("#regForm input, #regForm select").forEach(input => {
-        const saved = localStorage.getItem(input.name);
-        if (saved) input.value = saved;
-      });
+    metodePembayaran.addEventListener("change", () => {
+      const metode = metodePembayaran.value;
+      tampilkanNomorDanQR(metode);
     });
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      submitBtn.disabled = true;
-      submitBtn.textContent = "⏳ Mengirim...";
-
-      const data = new FormData(form);
-      const nama = data.get("nama");
-      const wa = data.get("wa");
-      const paket = data.get("paket");
-      const metode = data.get("pembayaran");
-      const referralInput = data.get("referral").trim().toUpperCase();
-      let referralBaru = data.get("referral_baru").trim().toUpperCase();
-
-      if (referralBaru && validReferralCodes[referralBaru]) {
-        alert("❗ Kode referral baru sudah digunakan orang lain. Silakan buat kode lain.");
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Kirim Pendaftaran";
-        return;
-      }
-
-      if (!referralBaru) {
-        const namaDepan = nama.trim().split(" ")[0].toUpperCase();
-        referralBaru = namaDepan + Math.floor(10 + Math.random() * 90);
-      }
-
-      const pesan =
-        `Halo! Saya ingin mendaftar komunitas kreator.
-` +
-        `Nama: ${nama}
-No. WA: ${wa}
-Paket: ${paket}
-` +
-        `Metode: ${metode}
-Kode Referral Baru: ${referralBaru}
-` +
-        `Kode Referral Teman: ${referralInput}
-` +
-        `Bonus: ${referralInput && validReferralCodes[referralInput] ? "1 Konten Eksklusif" : "-"}`;
-
-      window.open(`https://wa.me/6285928811220?text=${encodeURIComponent(pesan)}`, "_blank");
-
-      if (referralInput && validReferralCodes[referralInput]) {
-        const notifAdmin = `Pengguna ${nama} mendaftar dengan referral ${referralInput}, berhak dapat 1 konten eksklusif minggu pertama.`;
-        window.open(`https://wa.me/6285928811220?text=${encodeURIComponent(notifAdmin)}`, "_blank");
-        diskonInfo.innerHTML = `🎁 Kode referral valid! Kamu akan mendapatkan 1 konten eksklusif di minggu pertama.`;
+    salinBtn.addEventListener("click", function () {
+      const target = document.getElementById("targetNomor");
+      if (target) {
+        const text = target.textContent.trim();
+        navigator.clipboard.writeText(text).then(() => {
+          alert("✅ Nomor berhasil disalin: " + text);
+        }).catch(err => {
+          alert("❌ Gagal menyalin: " + err);
+        });
       } else {
-        diskonInfo.innerHTML = "";
+        alert("⚠️ Silakan pilih metode pembayaran terlebih dahulu.");
       }
-
-      document.getElementById("progress-bar").style.width = "100%";
-      document.querySelector("#progress-container + p").textContent = "Langkah 2 dari 2 – Selesai!";
-
-      thankyouMessage.innerHTML = `
-        <h3>🎉 Terima Kasih, ${nama}!</h3>
-        <p>Selamat bergabung dalam Komunitas Kreator. Kamu resmi menjadi bagian dari jaringan kreatif digital kami! 🌈 Tim kami akan segera menghubungi kamu melalui WhatsApp untuk mengaktifkan akses premium dan bonus spesialmu.</p>
-      `;
-      thankyouMessage.style.display = "block";
-
-      showToast("✅ Pendaftaran berhasil! Kami akan hubungi kamu via WA");
-      form.reset();
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Kirim Pendaftaran";
-      document.querySelectorAll("#regForm input, #regForm select").forEach(input => {
-        localStorage.removeItem(input.name);
-      });
     });
 
-    document.getElementById("referral").addEventListener("input", (e) => {
-      const kode = e.target.value.trim().toUpperCase();
-      if (validReferralCodes[kode]) {
-        diskonInfo.textContent = `🎁 Kode referral valid! Kamu akan mendapatkan 1 konten eksklusif di minggu pertama.`;
-      } else {
-        diskonInfo.textContent = "";
-      }
+    paketSelect.addEventListener("change", () => {
+      const harga = paketSelect.value;
+      hargaPaket.textContent = `💸 Total yang harus ditransfer: Rp${parseInt(harga).toLocaleString('id-ID')}`;
+
+      clearInterval(countdown);
+      const now = new Date();
+      batasWaktu = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+      countdown = setInterval(() => {
+        const sekarang = new Date();
+        const selisih = batasWaktu - sekarang;
+        if (selisih <= 0) {
+          clearInterval(countdown);
+          countdownEl.textContent = "⛔️ Waktu pembayaran telah habis.";
+        } else {
+          const jam = Math.floor(selisih / (1000 * 60 * 60));
+          const menit = Math.floor((selisih % (1000 * 60 * 60)) / (1000 * 60));
+          const detik = Math.floor((selisih % (1000 * 60)) / 1000);
+          countdownEl.textContent = `⏱️ Batas Pembayaran: ${jam}j ${menit}m ${detik}d`;
+        }
+      }, 1000);
     });
   </script>
 </body>
