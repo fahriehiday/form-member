@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Form Pendaftaran Member</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #dbeafe, #f0f9ff);
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #1e3a8a;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      font-size: 16px;
+    }
+    button {
+      background-color: #3b82f6;
+      color: white;
+      font-weight: bold;
+      border: none;
+      transition: background-color 0.3s;
+      position: sticky;
+      bottom: 10px;
+      z-index: 10;
+    }
+    button:hover {
+      background-color: #2563eb;
+    }
+    label {
+      font-weight: 600;
+    }
+    .highlight {
+      background-color: #e0f2fe;
+      padding: 8px;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    .help-button {
+      background-color: #facc15;
+      color: #1f2937;
+      margin-top: 20px;
+    }
+    .thankyou {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      background-color: #ecfdf5;
+      color: #065f46;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+    #toast {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #4ade80;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    #progress-container {
+      background: #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    #progress-bar {
+      background: #3b82f6;
+      height: 10px;
+      transition: width 0.3s ease;
+      width: 50%;
+    }
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+        font-size: 14px;
+      }
+      input, select, button {
+        font-size: 14px;
+      }
+    }
+  
+    s {
+      color: #9ca3af;
+      font-weight: normal;
+      margin-right: 6px;
+      text-decoration: line-through;
+    }
+    </style>
+
+</head>
+<body>
+  <h2>🎨 Form Pendaftaran Komunitas Kreator</h2>
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+  <p style="text-align:center;">Langkah 1 dari 2</p>
+
+  <form id="regForm">
+    <label>Nama Lengkap</label>
+    <input type="text" name="nama" required />
+
+    <label>Nomor WhatsApp</label>
+    <input type="text" name="wa" required />
+
+    <label>Pilih Paket:</label>
+    <select name="paket" id="paket">
+      <option value="paket1">🎉 <s>Rp34.999</s> Rp25.000 / 1 bulan</option>
+      <option value="paket2">🎉 <s>Rp54.999</s> Rp45.000 / 2 bulan</option>
+      <option value="paket3">🎉 <s>Rp74.999</s> Rp60.000 / 3 bulan</option>
+    </select>
+
+    <label>Metode Pembayaran:</label>
+    <select name="pembayaran">
+      <option value="DANA">DANA</option>
+      <option value="MANDIRI">Mandiri</option>
+    </select>
+
+    <label>Upload Bukti Pembayaran (foto)</label>
+    <input type="file" name="bukti" accept="image/*" required />
+
+    <label>Buat Kode Referral Anda</label>
+    <input type="text" name="referral_baru" placeholder="Contoh: NAMAKAMU25" />
+
+    <label>Kode Referral Orang Lain (opsional)</label>
+    <input type="text" name="referral" id="referral" />
+
+    <div id="diskonInfo" class="highlight"></div>
+
+    <button type="submit" id="submitBtn">Kirim Pendaftaran</button>
+  </form>
+
+  <button class="help-button" onclick="bukaBantuan()">❓ Butuh Bantuan?</button>
+
+  <div class="thankyou" id="thankyouMessage"></div>
+  <div id="toast"></div>
+
+  <script>
+    const validReferralCodes = {
+      "FAHRI25": true,
+      "ALFA07": true,
+      "NISA10": true
+    };
+
+    const form = document.getElementById("regForm");
+    const result = document.getElementById("result");
+    const diskonInfo = document.getElementById("diskonInfo");
+    const thankyouMessage = document.getElementById("thankyouMessage");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.style.display = "block";
+      setTimeout(() => { toast.style.display = "none"; }, 4000);
+    }
+
+    function bukaBantuan() {
+      const pesan = encodeURIComponent("Halo Admin! Saya butuh bantuan terkait pendaftaran. Bisa dibantu?");
+      window.open(`https://wa.me/6285928811220?text=${pesan}`, '_blank');
+    }
+
+    // Simpan input ke localStorage agar tidak hilang saat refresh
+    document.querySelectorAll("#regForm input, #regForm select").forEach(input => {
+      input.addEventListener("input", () => {
+        localStorage.setItem(input.name, input.value);
+      });
+    });
+    window.addEventListener("load", () => {
+      document.querySelectorAll("#regForm input, #regForm select").forEach(input => {
+        const saved = localStorage.getItem(input.name);
+        if (saved) input.value = saved;
+      });
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = "⏳ Mengirim...";
+
+      const data = new FormData(form);
+      const nama = data.get("nama");
+      const wa = data.get("wa");
+      const paket = data.get("paket");
+      const metode = data.get("pembayaran");
+      const referralInput = data.get("referral").trim().toUpperCase();
+      let referralBaru = data.get("referral_baru").trim().toUpperCase();
+
+      if (referralBaru && validReferralCodes[referralBaru]) {
+        alert("❗ Kode referral baru sudah digunakan orang lain. Silakan buat kode lain.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Kirim Pendaftaran";
+        return;
+      }
+
+      if (!referralBaru) {
+        const namaDepan = nama.trim().split(" ")[0].toUpperCase();
+        referralBaru = namaDepan + Math.floor(10 + Math.random() * 90);
+      }
+
+      const pesan =
+        `Halo! Saya ingin mendaftar komunitas kreator.
+` +
+        `Nama: ${nama}
+No. WA: ${wa}
+Paket: ${paket}
+` +
+        `Metode: ${metode}
+Kode Referral Baru: ${referralBaru}
+` +
+        `Kode Referral Teman: ${referralInput}
+` +
+        `Bonus: ${referralInput && validReferralCodes[referralInput] ? "1 Konten Eksklusif" : "-"}`;
+
+      window.open(`https://wa.me/6285928811220?text=${encodeURIComponent(pesan)}`, "_blank");
+
+      if (referralInput && validReferralCodes[referralInput]) {
+        const notifAdmin = `Pengguna ${nama} mendaftar dengan referral ${referralInput}, berhak dapat 1 konten eksklusif minggu pertama.`;
+        window.open(`https://wa.me/6285928811220?text=${encodeURIComponent(notifAdmin)}`, "_blank");
+        diskonInfo.innerHTML = `🎁 Kode referral valid! Kamu akan mendapatkan 1 konten eksklusif di minggu pertama.`;
+      } else {
+        diskonInfo.innerHTML = "";
+      }
+
+      document.getElementById("progress-bar").style.width = "100%";
+      document.querySelector("#progress-container + p").textContent = "Langkah 2 dari 2 – Selesai!";
+
+      thankyouMessage.innerHTML = `
+        <h3>🎉 Terima Kasih, ${nama}!</h3>
+        <p>Selamat bergabung dalam Komunitas Kreator. Kamu resmi menjadi bagian dari jaringan kreatif digital kami! 🌈 Tim kami akan segera menghubungi kamu melalui WhatsApp untuk mengaktifkan akses premium dan bonus spesialmu.</p>
+      `;
+      thankyouMessage.style.display = "block";
+
+      showToast("✅ Pendaftaran berhasil! Kami akan hubungi kamu via WA");
+      form.reset();
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Kirim Pendaftaran";
+      document.querySelectorAll("#regForm input, #regForm select").forEach(input => {
+        localStorage.removeItem(input.name);
+      });
+    });
+
+    document.getElementById("referral").addEventListener("input", (e) => {
+      const kode = e.target.value.trim().toUpperCase();
+      if (validReferralCodes[kode]) {
+        diskonInfo.textContent = `🎁 Kode referral valid! Kamu akan mendapatkan 1 konten eksklusif di minggu pertama.`;
+      } else {
+        diskonInfo.textContent = "";
+      }
+    });
+  </script>
+</body>
+</html>
