@@ -139,9 +139,9 @@
 
     <label>Pilih Paket:</label>
     <select name="paket" id="paket">
-      <option value="25000">🎉 Harga Semula <s>3̶4̶.̶9̶9̶9̶ </s> Menjadi Rp25.000</option>
-      <option value="45000">🎉 Harga Semula <s>5̶4̶.̶9̶9̶9̶ </s> Menjadi Rp45.000</option>
-      <option value="60000">🎉 Harga Semula <s>7̶4̶.̶9̶9̶9̶ </s> Menjadi Rp60.000</option>
+      <option value="25000">🎉 Harga Semula <s>3̶4̶.̶9̶9̶9̶ </s> Menjadi Rp25.000 / 1 Bulan</option>
+      <option value="45000">🎉 Harga Semula <s>5̶4̶.̶9̶9̶9̶ </s> Menjadi Rp45.000 / 2 Bulan</option>
+      <option value="60000">🎉 Harga Semula <s>7̶4̶.̶9̶9̶9̶ </s> Menjadi Rp60.000 / 3 Bulan</option>
     </select>
     <span class="harga-paket" id="hargaPaket"></span>
 
@@ -237,6 +237,32 @@
         }
       }, 1000);
     });
+
+    function bukaBantuan() {
+      const nama = document.querySelector('input[name="nama"]').value.trim();
+      const wa = document.querySelector('input[name="wa"]').value.trim();
+      const paket = document.querySelector('select[name="paket"]').value;
+      const metode = document.querySelector('select[name="pembayaran"]').value;
+      const nomor = "085928811220";
+
+      let pesan = `Halo, saya butuh bantuan.`;
+
+      if (nama !== "") {
+        pesan = `Halo, saya atas nama ${nama}`;
+        if (paket) {
+          pesan += `, memilih paket Rp${parseInt(paket).toLocaleString('id-ID')}`;
+        }
+        if (metode) {
+          pesan += `, menggunakan metode pembayaran ${metode}`;
+        }
+        if (wa) {
+          pesan += `. Nomor WA saya: ${wa}`;
+        }
+        pesan += ", saya butuh bantuan.";
+      }
+
+      window.open(`https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`, "_blank");
+    }
   </script>
 </body>
 </html>
