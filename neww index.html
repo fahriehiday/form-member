@@ -132,7 +132,7 @@
 
     function tampilkanNomorDanQR(metode) {
       if (metode === "DANA") {
-        nomorPembayaran.innerHTML = `💰 Transfer ke <strong id="targetNomor">0898-3637-8972</strong> a.n. Fahri Hidayat`;
+        nomorPembayaran.innerHTML = `💰 Transfer ke <strong id="targetNomor">0838-3637-8972</strong> a.n. Fahri Hidayat`;
       } else if (metode === "MANDIRI") {
         nomorPembayaran.innerHTML = `🏦 Transfer ke <strong id="targetNomor">1340030538796</strong> a.n. Fahri Hidayat`;
       } else {
@@ -187,7 +187,7 @@
       const wa = document.querySelector('input[name="wa"]').value.trim();
       const paket = document.querySelector('select[name="paket"]').value;
       const metode = document.querySelector('select[name="pembayaran"]').value;
-      const nomor = "085928811220";
+      const nomor = "+6285928811220";
 
       let pesan = `Halo, saya butuh bantuan.`;
 
@@ -226,7 +226,7 @@
       if (referral) pesan += `👥 Kode Referral Teman: ${referral}\n`;
       pesan += `📎 Bukti pembayaran sudah diupload melalui form.`;
 
-      const nomorAdmin = "085928811220";
+      const nomorAdmin = "+6285928811220";
       window.open(`https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`, "_blank");
     });
   </script>
